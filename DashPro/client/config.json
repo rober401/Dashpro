@@ -1,0 +1,10 @@
+{
+    "server": {
+        "api_url": "http://127.0.0.1:8000/api/heartbeat",
+        "auth_token": "3f91a2d4a77b2e9a437b25f2acfe99405df2c1cb9e07a94f3f5d1df5d7f8e6b8"
+    },
+    "settings": {
+        "interval_seconds": 60,
+        "log_level": "INFO"
+    }
+}
