@@ -42,7 +42,6 @@ def threatHandler(file_path=None, status=None):
 
 
 if __name__ == '__main__':
-    # 1️⃣ Load configuration once at startup
     try:
         config = load_config()
         api_url = config["server"]["api_url"]
@@ -52,16 +51,13 @@ if __name__ == '__main__':
         exit(1)
 
     print(f"[INIT] Client started. Sending updates to {api_url}")
-    # ✅ Start the file watcher with callback
     threading.Thread(target=lambda: filescannerDown.main(threatHandler), daemon=True).start()
     print("[INIT] Started Monitoring Downloads Folder")
     #print(f"[INIT] Started Monitoring Downloads Folder")
 
-    # ✅ Generate or load a persistent device ID (unique per machine)
     device_id = get_device_id()
     print(f"[INIT] Device ID: {device_id}")
 
-    # 2️⃣ Loop every 60 seconds
     while True:
         try:
 
@@ -69,7 +65,6 @@ if __name__ == '__main__':
             # Gather system info
             payload = get_system_info()
 
-            # ✅ Ensure device_id is always included
             payload["device_id"] = device_id
 
             # Send data to API
@@ -86,3 +81,4 @@ if __name__ == '__main__':
 
         # Wait before next cycle
         time.sleep(60)
+
