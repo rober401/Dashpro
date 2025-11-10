@@ -1,16 +1,15 @@
 from flask import Flask, render_template, jsonify
 import sqlite3, os
+from datetime import datetime
+import pytz
 
 app = Flask(__name__)
 
-# ✅ Use same root database file
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(BASE_DIR, "database.db")
 
-from datetime import datetime
-import pytz  # pip install pytz
 
-LOCAL_TZ = pytz.timezone("America/New_York")  # change this to your timezone
+LOCAL_TZ = pytz.timezone("America/New_York")  
 
 def to_local_time(iso_time):
     try:
@@ -18,7 +17,7 @@ def to_local_time(iso_time):
         local_time = utc_time.astimezone(LOCAL_TZ)
         return local_time.strftime("%m/%d/%Y %I:%M%p")
     except Exception:
-        return iso_time  # if invalid or null
+        return iso_time
 
 
 def get_db_connection():
@@ -33,7 +32,6 @@ def fetch_reports():
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
 
-    # ✅ Added uptime column
     c.execute("""
         SELECT 
             id, flag_count, last_flag_type, last_flag_file, device_id, hostname, user,
@@ -84,3 +82,4 @@ def index():
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
+
