@@ -16,17 +16,15 @@ import pytz
 
 
 app = FastAPI()
-LOCAL_TZ = pytz.timezone("America/New_York")  # or your timezone
+LOCAL_TZ = pytz.timezone("America/New_York") 
 
 
-# ✅ Centralize your DB path
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 DB_PATH = os.path.join(BASE_DIR, 'database.db')
 print(f"[API] Using database file: {DB_PATH}")
 
-# ✅ All database columns (besides id)
 FIELDS = [
-    "flag_count", "last_flag_type", "last_flag_file",  # ✅ ADDED
+    "flag_count", "last_flag_type", "last_flag_file", 
     "device_id", "hostname", "user", "os", "os_version", "architecture",
     "ip", "mac", "cpu_usage_percent", "cpu_cores", "total_memory_gb",
     "used_memory_gb", "memory_usage_percent", "status", "uptime",
@@ -43,7 +41,6 @@ def to_local_time(iso_time):
     except Exception:
         return iso_time
 
-# ✅ Thread: background monitor for offline devices
 def check_device_status():
     print("API:     Started watching device status...")
     while True:
@@ -59,7 +56,7 @@ def check_device_status():
                 if not last_seen:
                     continue
                 try:
-                    last_dt = datetime.fromisoformat(last_seen)  # ✅ Works now that last_seen is ISO
+                    last_dt = datetime.fromisoformat(last_seen)
                     if last_dt < cutoff:
                         c.execute("UPDATE reports SET status = ? WHERE id = ?", ("offline", id_))
                     else:
@@ -73,7 +70,6 @@ def check_device_status():
             print(f"[ERROR] Device watcher failed: {e}")
         time.sleep(60)  # run every 60 seconds
 
-# ✅ Create / ensure database table matches your fields
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -158,39 +154,33 @@ async def receive_data(request: Request, authorization: str = Header(None)):
     data = await request.json()
     print(json.dumps(data, indent=2))
 
-    # ✅ Auth check
     if authorization != "Bearer 3f91a2d4a77b2e9a437b25f2acfe99405df2c1cb9e07a94f3f5d1df5d7f8e6b8":
         return JSONResponse(status_code=401, content={"error": "Unauthorized"})
 
-    # ✅ Validate required field
     device_id = data.get("device_id")
     if not device_id:
         return JSONResponse(status_code=400, content={"error": "Missing device_id"})
 
-    # ✅ Prepare timestamps
-    last_seen_iso = datetime.now().isoformat()  # ✅ FIXED for watcher
+    last_seen_iso = datetime.now().isoformat()  
     now_display = datetime.now().strftime("%m/%d/%Y %I:%M%p").lstrip("0").replace(" 0", " ")
 
 
-    # ✅ Fill defaults for missing fields
     values = []
     for field in FIELDS:
         if field == "timestamp":
             values.append(now_display)
         elif field == "last_seen":
-            values.append(last_seen_iso)  # ✅ FIXED
+            values.append(last_seen_iso)  
         else:
             values.append(data.get(field, None))
 
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
-    # ✅ Check if this device exists
     c.execute("SELECT id FROM reports WHERE device_id = ?", (device_id,))
     existing = c.fetchone()
 
     if existing:
-        # ✅ Update dynamically
         update_clause = ", ".join([f"{f} = ?" for f in FIELDS if f != "device_id"])
         c.execute(f"""
             UPDATE reports
@@ -201,7 +191,6 @@ async def receive_data(request: Request, authorization: str = Header(None)):
               for f in FIELDS if f != "device_id"] + [device_id])
         action = "updated"
     else:
-        # 🆕 Insert dynamically
         placeholders = ", ".join(["?"] * len(FIELDS))
         columns = ", ".join(FIELDS)
         c.execute(f"""
@@ -215,6 +204,6 @@ async def receive_data(request: Request, authorization: str = Header(None)):
 
     return {"status": "success", "message": f"Device {action}"}
 
-# Run standalone
 if __name__ == "__main__":
     init_db()
+
