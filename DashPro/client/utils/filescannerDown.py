@@ -34,13 +34,13 @@ def scan_file(path):
         if "no threats" in text or "no threats were detected" in text or "threats found: 0" in text:
             #return f"SAFE {path}"
         ############################################################
-            if alert_callback:  # ✅ only call if client provided it
+            if alert_callback:  
                 alert_callback(path, "TEST_NOT_A_THREAT")
             return f"TEST_NOT_A_THREAT {path}"
         ############################################################
 
         elif "detected" in text or "threat" in text or "quarantined" in text:
-            if alert_callback:  # ✅ only call if client provided it
+            if alert_callback:  
                 alert_callback(path, "THREAT")
             return f"THREAT {path}"
 
@@ -64,7 +64,7 @@ class DownloadHandler(FileSystemEventHandler):
 def main(callback=None):
     """Start watching the Downloads folder."""
     global alert_callback
-    alert_callback = callback  # ✅ store reference for use in scan_file()
+    alert_callback = callback 
 
     event_handler = DownloadHandler()
     observer = Observer()
@@ -82,3 +82,4 @@ def main(callback=None):
 
 if __name__ == "__main__":
     main()  # runs standalone if executed directly
+
