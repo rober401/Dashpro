@@ -75,7 +75,6 @@ def get_system_info():
         now = datetime.now()
         timestamp = now.strftime("%I:%M %p")
 
-        # ✅ Include the persistent device_id
         return {
             "flags": flags,
             "device_id": get_device_id(),
@@ -91,10 +90,11 @@ def get_system_info():
             "total_memory_gb": total_memory_gb,
             "used_memory_gb": used_memory_gb,
             "memory_usage_percent": memory_percent,
-            "uptime": get_system_uptime(),  # ✅ Add this line
+            "uptime": get_system_uptime(),  
             "timestamp": timestamp,
             "status": "online"
         }
 
     except Exception as e:
         return {"error": str(e)}
+
